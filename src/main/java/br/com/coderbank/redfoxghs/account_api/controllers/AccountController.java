@@ -20,7 +20,7 @@ public class AccountController {
 
     @PostMapping
     public ResponseEntity<AccountEntity> createNewAccount(@RequestBody NewAccountVO newAccount) {
-        var account = accountService.createNewAccount(newAccount.getIdClient());
+        var account = accountService.create(newAccount.getIdClient());
         return account
                 .map(accountEntity -> ResponseEntity.status(HttpStatus.CREATED).body(accountEntity))
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.BAD_REQUEST).build());

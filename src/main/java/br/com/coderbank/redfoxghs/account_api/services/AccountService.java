@@ -17,7 +17,7 @@ public class AccountService {
     @Autowired
     private AccountRepository accountRepository;
 
-    public Optional<AccountEntity> createNewAccount(UUID idClient) {
+    public Optional<AccountEntity> create(UUID idClient) {
         if (accountRepository.existsByIdClient(idClient)) {
             throw new CustomDatabaseException("Já existe uma conta com esse id de cliente");
         }

@@ -2,6 +2,8 @@ package br.com.coderbank.redfoxghs.account_api.entities;
 
 import br.com.coderbank.redfoxghs.account_api.utils.NumberUtils;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 
 import java.math.BigDecimal;
 import java.util.Objects;
@@ -22,6 +24,8 @@ public class AccountEntity {
     private Integer agencyNumber;
 
     @Column(nullable = false, length = 6, unique = true)
+    @Min(100000)
+    @Max(999999)
     private Integer accountNumber;
 
     @Column
