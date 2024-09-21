@@ -1,6 +1,6 @@
 package br.com.coderbank.redfoxghs.account_api.controllers;
 
-import br.com.coderbank.redfoxghs.account_api.controllers.vos.NewAccountVO;
+import br.com.coderbank.redfoxghs.account_api.controllers.dtos.NewAccountDTO;
 import br.com.coderbank.redfoxghs.account_api.entities.AccountEntity;
 import br.com.coderbank.redfoxghs.account_api.services.AccountService;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,7 +48,7 @@ public class AccountControllerTest {
 
     @Test
     public void testCreateNewAccount_Success() throws Exception {
-        NewAccountVO newAccount = new NewAccountVO();
+        NewAccountDTO newAccount = new NewAccountDTO();
         newAccount.setIdClient(idClient);
 
         AccountEntity accountEntity = new AccountEntity();

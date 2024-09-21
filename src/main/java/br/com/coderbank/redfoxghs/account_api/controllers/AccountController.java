@@ -1,6 +1,6 @@
 package br.com.coderbank.redfoxghs.account_api.controllers;
 
-import br.com.coderbank.redfoxghs.account_api.controllers.vos.NewAccountVO;
+import br.com.coderbank.redfoxghs.account_api.controllers.dtos.NewAccountDTO;
 import br.com.coderbank.redfoxghs.account_api.entities.AccountEntity;
 import br.com.coderbank.redfoxghs.account_api.services.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +19,7 @@ public class AccountController {
     private AccountService accountService;
 
     @PostMapping
-    public ResponseEntity<AccountEntity> createNewAccount(@RequestBody NewAccountVO newAccount) {
+    public ResponseEntity<AccountEntity> createNewAccount(@RequestBody NewAccountDTO newAccount) {
         var account = accountService.create(newAccount.getIdClient());
         return ResponseEntity.status(HttpStatus.CREATED).body(account);
     }

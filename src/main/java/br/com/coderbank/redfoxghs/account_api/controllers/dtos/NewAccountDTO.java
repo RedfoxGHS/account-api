@@ -1,8 +1,8 @@
-package br.com.coderbank.redfoxghs.account_api.controllers.vos;
+package br.com.coderbank.redfoxghs.account_api.controllers.dtos;
 
 import java.util.UUID;
 
-public class NewAccountVO {
+public class NewAccountDTO {
     public UUID idClient;
 
     public UUID getIdClient() {
