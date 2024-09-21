@@ -44,16 +44,15 @@ public class AccountServiceTest {
         when(accountRepository.existsByIdClient(idClient)).thenReturn(false);
         when(accountRepository.save(any())).thenReturn(accountEntity);
 
-        Optional<AccountEntity> account = accountService.create(idClient);
+        AccountEntity account = accountService.create(idClient);
 
         verify(accountRepository).existsByIdClient(idClient);
         verify(accountRepository).save(any());
 
-        assertTrue(account.isPresent());
-        assertEquals(idClient, account.get().getIdClient());
-        assertEquals(1, account.get().getAgencyNumber());
-        assertEquals(0, account.get().getBalance().compareTo(BigDecimal.ZERO));
-        assertEquals(6, String.valueOf(account.get().getAccountNumber()).length());
+        assertEquals(idClient, account.getIdClient());
+        assertEquals(1, account.getAgencyNumber());
+        assertEquals(0, account.getBalance().compareTo(BigDecimal.ZERO));
+        assertEquals(6, String.valueOf(account.getAccountNumber()).length());
     }
 
     @Test

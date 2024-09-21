@@ -17,7 +17,7 @@ public class AccountService {
     @Autowired
     private AccountRepository accountRepository;
 
-    public Optional<AccountEntity> create(UUID idClient) {
+    public AccountEntity create(UUID idClient) {
         if (accountRepository.existsByIdClient(idClient)) {
             throw new CustomDatabaseException("Já existe uma conta com esse id de cliente");
         }
@@ -26,7 +26,7 @@ public class AccountService {
         accountEntity.setIdClient(idClient);
 
         try {
-            return Optional.of(accountRepository.save(accountEntity));
+            return accountRepository.save(accountEntity);
         } catch (DataIntegrityViolationException e) {
             throw new CustomDatabaseException("Erro de integridade de dados ao salvar a conta", e);
         } catch (Exception e) {
