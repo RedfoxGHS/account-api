@@ -1,5 +1,6 @@
 package br.com.coderbank.redfoxghs.account_api.exception;
 
+import br.com.coderbank.redfoxghs.account_api.exception.dbexceptions.ConflictDatabaseException;
 import br.com.coderbank.redfoxghs.account_api.exception.dbexceptions.CustomDatabaseException;
 import br.com.coderbank.redfoxghs.account_api.exception.dbexceptions.GeneralDatabaseException;
 import org.springframework.http.HttpStatus;
@@ -39,6 +40,14 @@ public class GlobalExceptionHandler {
         String error = "BadRequest";
 
         return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), error, ex.getMessage());
+    }
+
+    @ExceptionHandler(ConflictDatabaseException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse handleConflictDatabaseException(ConflictDatabaseException ex) {
+        String error = "Conflict";
+
+        return new ErrorResponse(HttpStatus.CONFLICT.value(), error, ex.getMessage());
     }
 
     @ExceptionHandler(GeneralDatabaseException.class)

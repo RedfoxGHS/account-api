@@ -2,6 +2,7 @@ package br.com.coderbank.redfoxghs.account_api.services;
 
 import br.com.coderbank.redfoxghs.account_api.controllers.dtos.AccountResponseDTO;
 import br.com.coderbank.redfoxghs.account_api.entities.AccountEntity;
+import br.com.coderbank.redfoxghs.account_api.exception.dbexceptions.ConflictDatabaseException;
 import br.com.coderbank.redfoxghs.account_api.exception.dbexceptions.CustomDatabaseException;
 import br.com.coderbank.redfoxghs.account_api.exception.dbexceptions.GeneralDatabaseException;
 import br.com.coderbank.redfoxghs.account_api.repositories.AccountRepository;
@@ -19,7 +20,7 @@ public class AccountService {
 
     public AccountResponseDTO create(UUID idClient) {
         if (accountRepository.existsByIdClient(idClient)) {
-            throw new CustomDatabaseException("Já existe uma conta com esse id de cliente");
+            throw new ConflictDatabaseException("Já existe uma conta para o cliente com id " + idClient);
         }
 
         AccountEntity accountEntity = new AccountEntity();

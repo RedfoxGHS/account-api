@@ -58,7 +58,7 @@ public class AccountServiceTest {
 
     @Test
     public void testCreate_AccountExists() {
-        String expectedMessage = "Já existe uma conta com esse id de cliente";
+        String expectedMessage = "Já existe uma conta para o cliente com id " + idClient;
 
         when(accountRepository.existsByIdClient(idClient)).thenReturn(true);
 
