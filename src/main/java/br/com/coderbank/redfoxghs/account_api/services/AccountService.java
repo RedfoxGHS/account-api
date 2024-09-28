@@ -1,5 +1,6 @@
 package br.com.coderbank.redfoxghs.account_api.services;
 
+import br.com.coderbank.redfoxghs.account_api.controllers.dtos.AccountResponseDTO;
 import br.com.coderbank.redfoxghs.account_api.entities.AccountEntity;
 import br.com.coderbank.redfoxghs.account_api.exception.dbexceptions.CustomDatabaseException;
 import br.com.coderbank.redfoxghs.account_api.exception.dbexceptions.GeneralDatabaseException;
@@ -8,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -17,7 +17,7 @@ public class AccountService {
     @Autowired
     private AccountRepository accountRepository;
 
-    public AccountEntity create(UUID idClient) {
+    public AccountResponseDTO create(UUID idClient) {
         if (accountRepository.existsByIdClient(idClient)) {
             throw new CustomDatabaseException("Já existe uma conta com esse id de cliente");
         }
@@ -26,7 +26,14 @@ public class AccountService {
         accountEntity.setIdClient(idClient);
 
         try {
-            return accountRepository.save(accountEntity);
+            AccountEntity savedAccount = accountRepository.save(accountEntity);
+            return new AccountResponseDTO(
+                    savedAccount.getIdAccount(),
+                    savedAccount.getIdClient(),
+                    savedAccount.getAgencyNumber(),
+                    savedAccount.getAccountNumber(),
+                    savedAccount.getBalance()
+            );
         } catch (DataIntegrityViolationException e) {
             throw new CustomDatabaseException("Erro de integridade de dados ao salvar a conta", e);
         } catch (Exception e) {

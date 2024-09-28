@@ -2,33 +2,35 @@ package br.com.coderbank.redfoxghs.account_api.exception;
 
 import br.com.coderbank.redfoxghs.account_api.exception.dbexceptions.CustomDatabaseException;
 import br.com.coderbank.redfoxghs.account_api.exception.dbexceptions.GeneralDatabaseException;
-import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.UUID;
+import java.util.HashMap;
+import java.util.Map;
 
 @ControllerAdvice
 @RestController
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(HttpMessageNotReadableException.class)
+    @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
-        String mensagem = "Erro ao processar a solicitação.";
-        String error = "BadRequest";
+    public ErrorResponse handleHttpMessageNotReadableException(MethodArgumentNotValidException ex) {
+        Map<String, String> errors = new HashMap<>();
 
-        if (ex.getCause() instanceof InvalidFormatException invalidFormatException) {
-            if (invalidFormatException.getTargetType().equals(UUID.class)) {
-                mensagem += " O UUID fornecido é inválido. Certifique-se de que ele tenha o formato correto.";
-            }
-        }
+        ex.getBindingResult().getAllErrors().forEach(error -> {
+            String fieldName = ((FieldError) error).getField();
+            String errorMessage = error.getDefaultMessage();
+            errors.put(fieldName, errorMessage);
+        });
 
-        return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), error, mensagem);
+        String error = "Validation failed";
+
+        return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), error, errors.toString());
     }
 
     @ExceptionHandler(CustomDatabaseException.class)

@@ -1,7 +1,6 @@
 package br.com.coderbank.redfoxghs.account_api.controllers;
 
-import br.com.coderbank.redfoxghs.account_api.controllers.dtos.NewAccountDTO;
-import br.com.coderbank.redfoxghs.account_api.entities.AccountEntity;
+import br.com.coderbank.redfoxghs.account_api.controllers.dtos.AccountResponseDTO;
 import br.com.coderbank.redfoxghs.account_api.services.AccountService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,6 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 import static org.mockito.Mockito.verify;
@@ -48,13 +48,15 @@ public class AccountControllerTest {
 
     @Test
     public void testCreateNewAccount_Success() throws Exception {
-        NewAccountDTO newAccount = new NewAccountDTO();
-        newAccount.setIdClient(idClient);
+        AccountResponseDTO accountResponseDTO = new AccountResponseDTO(
+                UUID.randomUUID(),
+                idClient,
+                1234,
+                123456,
+                BigDecimal.ZERO
+        );
 
-        AccountEntity accountEntity = new AccountEntity();
-        accountEntity.setIdClient(idClient);
-
-        when(accountService.create(idClient)).thenReturn(accountEntity);
+        when(accountService.create(idClient)).thenReturn(accountResponseDTO);
 
         mockMvc.perform(post("/api/v1/account")
                         .contentType(MediaType.APPLICATION_JSON)

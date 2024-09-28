@@ -1,5 +1,6 @@
 package br.com.coderbank.redfoxghs.account_api.services;
 
+import br.com.coderbank.redfoxghs.account_api.controllers.dtos.AccountResponseDTO;
 import br.com.coderbank.redfoxghs.account_api.entities.AccountEntity;
 import br.com.coderbank.redfoxghs.account_api.exception.dbexceptions.CustomDatabaseException;
 import br.com.coderbank.redfoxghs.account_api.exception.dbexceptions.GeneralDatabaseException;
@@ -13,11 +14,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
 
 import java.math.BigDecimal;
-import java.util.Optional;
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
-import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 public class AccountServiceTest {
@@ -44,19 +45,19 @@ public class AccountServiceTest {
         when(accountRepository.existsByIdClient(idClient)).thenReturn(false);
         when(accountRepository.save(any())).thenReturn(accountEntity);
 
-        AccountEntity account = accountService.create(idClient);
+        AccountResponseDTO account = accountService.create(idClient);
 
         verify(accountRepository).existsByIdClient(idClient);
         verify(accountRepository).save(any());
 
-        assertEquals(idClient, account.getIdClient());
-        assertEquals(1, account.getAgencyNumber());
-        assertEquals(0, account.getBalance().compareTo(BigDecimal.ZERO));
-        assertEquals(6, String.valueOf(account.getAccountNumber()).length());
+        assertEquals(idClient, account.idClient());
+        assertEquals(1, account.agencyNumber());
+        assertEquals(0, account.balance().compareTo(BigDecimal.ZERO));
+        assertEquals(6, String.valueOf(account.accountNumber()).length());
     }
 
     @Test
-    public void testCreate_AccountExists(){
+    public void testCreate_AccountExists() {
         String expectedMessage = "Já existe uma conta com esse id de cliente";
 
         when(accountRepository.existsByIdClient(idClient)).thenReturn(true);
@@ -70,7 +71,7 @@ public class AccountServiceTest {
     }
 
     @Test
-    public void testCreate_DataIntegrityViolation(){
+    public void testCreate_DataIntegrityViolation() {
         String expectedMessage = "Erro de integridade de dados ao salvar a conta";
 
         when(accountRepository.existsByIdClient(idClient)).thenReturn(false);
@@ -96,7 +97,7 @@ public class AccountServiceTest {
                 .thenThrow(new RuntimeException("Erro desconhecido"));
 
         GeneralDatabaseException exception = assertThrows(GeneralDatabaseException.class, () -> {
-           accountService.create(idClient);
+            accountService.create(idClient);
         });
 
         verify(accountRepository).existsByIdClient(idClient);

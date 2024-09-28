@@ -1,12 +1,12 @@
 package br.com.coderbank.redfoxghs.account_api.entities;
 
-import br.com.coderbank.redfoxghs.account_api.utils.NumberUtils;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 
 import java.math.BigDecimal;
 import java.util.Objects;
+import java.util.Random;
 import java.util.UUID;
 
 @Entity
@@ -34,7 +34,7 @@ public class AccountEntity {
     public AccountEntity() {
         this.balance = BigDecimal.ZERO;
         agencyNumber = 1;
-        accountNumber = NumberUtils.generateRandomNumberWithDigits(6);
+        accountNumber = 100000 + new Random().nextInt(900000);
     }
 
     public UUID getIdAccount() {
