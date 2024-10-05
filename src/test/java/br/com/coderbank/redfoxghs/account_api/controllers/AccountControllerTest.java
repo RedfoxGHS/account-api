@@ -12,6 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.math.BigDecimal;
@@ -85,9 +86,11 @@ public class AccountControllerTest {
                 BigDecimal.TEN
         );
 
+        when(accountService.getBalanceAccount(idClient)).thenReturn(accountBalanceResponseDTO);
+
         mockMvc.perform(get("/api/v1/account/" + idClient))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.balance").value(accountBalanceResponseDTO.balance().toString()));
+                .andExpect(jsonPath("$.balance").value(accountBalanceResponseDTO.balance()));
     }
 }
 
