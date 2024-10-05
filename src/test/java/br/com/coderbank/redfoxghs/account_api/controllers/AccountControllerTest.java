@@ -1,6 +1,7 @@
 package br.com.coderbank.redfoxghs.account_api.controllers;
 
-import br.com.coderbank.redfoxghs.account_api.controllers.dtos.AccountResponseDTO;
+import br.com.coderbank.redfoxghs.account_api.controllers.dtos.response.AccountBalanceResponseDTO;
+import br.com.coderbank.redfoxghs.account_api.controllers.dtos.response.AccountResponseDTO;
 import br.com.coderbank.redfoxghs.account_api.services.AccountService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,6 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.math.BigDecimal;
@@ -18,6 +20,7 @@ import java.util.UUID;
 
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -75,6 +78,19 @@ public class AccountControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(invalidJson))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void testGetBalanceById_Success() throws Exception {
+        AccountBalanceResponseDTO accountBalanceResponseDTO = new AccountBalanceResponseDTO(
+                BigDecimal.TEN
+        );
+
+        when(accountService.getBalanceAccount(idClient)).thenReturn(accountBalanceResponseDTO);
+
+        mockMvc.perform(get("/api/v1/account/" + idClient))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.balance").value(accountBalanceResponseDTO.balance()));
     }
 }
 
