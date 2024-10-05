@@ -3,6 +3,7 @@ package br.com.coderbank.redfoxghs.account_api.exception;
 import br.com.coderbank.redfoxghs.account_api.exception.dbexceptions.ConflictDatabaseException;
 import br.com.coderbank.redfoxghs.account_api.exception.dbexceptions.CustomDatabaseException;
 import br.com.coderbank.redfoxghs.account_api.exception.dbexceptions.GeneralDatabaseException;
+import br.com.coderbank.redfoxghs.account_api.exception.dbexceptions.NotFoundDatabaseException;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -55,6 +56,13 @@ public class GlobalExceptionHandler {
     public ErrorResponse handleGeneralDatabaseException(GeneralDatabaseException ex) {
         String error = "InternalServerError";
         return new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), error, ex.getMessage());
+    }
+
+    @ExceptionHandler(NotFoundDatabaseException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleNotFoundDatabaseException(NotFoundDatabaseException ex) {
+        String error = "NotFound";
+        return new ErrorResponse(HttpStatus.NOT_FOUND.value(), error, ex.getMessage());
     }
 }
 

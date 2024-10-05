@@ -1,9 +1,11 @@
 package br.com.coderbank.redfoxghs.account_api.services;
 
-import br.com.coderbank.redfoxghs.account_api.controllers.dtos.AccountResponseDTO;
+import br.com.coderbank.redfoxghs.account_api.controllers.dtos.response.AccountBalanceResponseDTO;
+import br.com.coderbank.redfoxghs.account_api.controllers.dtos.response.AccountResponseDTO;
 import br.com.coderbank.redfoxghs.account_api.entities.AccountEntity;
 import br.com.coderbank.redfoxghs.account_api.exception.dbexceptions.CustomDatabaseException;
 import br.com.coderbank.redfoxghs.account_api.exception.dbexceptions.GeneralDatabaseException;
+import br.com.coderbank.redfoxghs.account_api.exception.dbexceptions.NotFoundDatabaseException;
 import br.com.coderbank.redfoxghs.account_api.repositories.AccountRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -30,11 +33,13 @@ public class AccountServiceTest {
     private AccountService accountService;
 
     private UUID idClient;
+    private UUID idAccount;
 
 
     @BeforeEach
     public void setUp() {
         idClient = UUID.randomUUID();
+        idAccount = UUID.randomUUID();
     }
 
     @Test
@@ -104,5 +109,35 @@ public class AccountServiceTest {
         verify(accountRepository).save(any(AccountEntity.class));
 
         assertEquals(expectedMessage, exception.getMessage());
+    }
+
+    @Test
+    public void testGetBalanceAccount_AccountNotFound() {
+        String expectedMessage = "Não foi encontrada uma conta com esse id " + idAccount;
+
+        when(accountRepository.findById(idAccount)).thenReturn(Optional.empty());
+
+        NotFoundDatabaseException exception = assertThrows(NotFoundDatabaseException.class, () -> {
+            accountService.getBalanceAccount(idAccount);
+        });
+
+        verify(accountRepository).findById(idAccount);
+
+        assertEquals(expectedMessage, exception.getMessage());
+    }
+
+    @Test
+    public void testGetBalanceAccount_AccountFound() {
+        AccountBalanceResponseDTO accountBalanceResponseDTO = new AccountBalanceResponseDTO(BigDecimal.TEN);
+        AccountEntity accountEntity = new AccountEntity();
+        accountEntity.addBalance(BigDecimal.TEN);
+
+        when(accountRepository.findById(idAccount)).thenReturn(Optional.of(accountEntity));
+
+        AccountBalanceResponseDTO account = accountService.getBalanceAccount(idAccount);
+
+        verify(accountRepository).findById(idAccount);
+
+        assertEquals(0, accountBalanceResponseDTO.balance().compareTo(account.balance()));
     }
 }
