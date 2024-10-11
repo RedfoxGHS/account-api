@@ -128,7 +128,7 @@ public class AccountServiceTest {
 
     @Test
     public void testGetBalanceAccount_AccountFound() {
-        AccountBalanceResponseDTO accountBalanceResponseDTO = new AccountBalanceResponseDTO(BigDecimal.TEN);
+        AccountBalanceResponseDTO accountEntityExpectedDTO  = new AccountBalanceResponseDTO(BigDecimal.TEN);
         AccountEntity accountEntity = new AccountEntity();
         accountEntity.addBalance(BigDecimal.TEN);
 
@@ -138,6 +138,6 @@ public class AccountServiceTest {
 
         verify(accountRepository).findById(idAccount);
 
-        assertEquals(0, accountBalanceResponseDTO.balance().compareTo(account.balance()));
+        assertEquals(0, accountEntityExpectedDTO .balance().compareTo(account.balance()));
     }
 }

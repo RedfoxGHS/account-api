@@ -47,11 +47,8 @@ public class AccountService {
 
     public AccountBalanceResponseDTO getBalanceAccount(UUID idAccount) {
 
-        Optional<AccountEntity> accountEntityOptional = accountRepository.findById(idAccount);
-
-        if (accountEntityOptional.isEmpty()) {
-            throw new NotFoundDatabaseException("Não foi encontrada uma conta com esse id " + idAccount);
-        }
+        Optional<AccountEntity> accountEntityOptional = Optional.ofNullable(accountRepository.findById(idAccount)
+                .orElseThrow(() -> new NotFoundDatabaseException("Não foi encontrada uma conta com esse id " + idAccount)));
 
         return new AccountBalanceResponseDTO(
                 accountEntityOptional.get().getBalance()

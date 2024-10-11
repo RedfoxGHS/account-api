@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/account")
+@RequestMapping("/api/v1/accounts")
 public class AccountController {
 
     @Autowired
@@ -26,7 +26,7 @@ public class AccountController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<AccountBalanceResponseDTO> getBalanceById(@Valid @PathVariable(value = "id") UUID idAccount) {
+    public ResponseEntity<AccountBalanceResponseDTO> getBalanceById(@PathVariable(value = "id") UUID idAccount) {
         return ResponseEntity.ok(accountService.getBalanceAccount(idAccount));
     }
 }
