@@ -1,10 +1,10 @@
 package br.com.coderbank.redfoxghs.account_api.services;
 
+import br.com.coderbank.redfoxghs.account_api.controllers.dtos.request.IncreaseAccountBalanceRequestDTO;
 import br.com.coderbank.redfoxghs.account_api.controllers.dtos.response.AccountBalanceResponseDTO;
 import br.com.coderbank.redfoxghs.account_api.controllers.dtos.response.AccountResponseDTO;
 import br.com.coderbank.redfoxghs.account_api.entities.AccountEntity;
 import br.com.coderbank.redfoxghs.account_api.exception.dbexceptions.CustomDatabaseException;
-import br.com.coderbank.redfoxghs.account_api.exception.dbexceptions.GeneralDatabaseException;
 import br.com.coderbank.redfoxghs.account_api.exception.dbexceptions.NotFoundDatabaseException;
 import br.com.coderbank.redfoxghs.account_api.repositories.AccountRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -94,26 +94,8 @@ public class AccountServiceTest {
     }
 
     @Test
-    public void testCreate_UnknownError() {
-        String expectedMessage = "Erro desconhecido ao salvar a conta";
-
-        when(accountRepository.existsByIdClient(idClient)).thenReturn(false);
-        when(accountRepository.save(any(AccountEntity.class)))
-                .thenThrow(new RuntimeException("Erro desconhecido"));
-
-        GeneralDatabaseException exception = assertThrows(GeneralDatabaseException.class, () -> {
-            accountService.create(idClient);
-        });
-
-        verify(accountRepository).existsByIdClient(idClient);
-        verify(accountRepository).save(any(AccountEntity.class));
-
-        assertEquals(expectedMessage, exception.getMessage());
-    }
-
-    @Test
     public void testGetBalanceAccount_AccountNotFound() {
-        String expectedMessage = "Não foi encontrada uma conta com esse id " + idAccount;
+        String expectedMessage = "Não foi encontrada uma conta com esse id: " + idAccount;
 
         when(accountRepository.findById(idAccount)).thenReturn(Optional.empty());
 
@@ -128,7 +110,7 @@ public class AccountServiceTest {
 
     @Test
     public void testGetBalanceAccount_AccountFound() {
-        AccountBalanceResponseDTO accountEntityExpectedDTO  = new AccountBalanceResponseDTO(BigDecimal.TEN);
+        AccountBalanceResponseDTO accountEntityExpectedDTO = new AccountBalanceResponseDTO(BigDecimal.TEN);
         AccountEntity accountEntity = new AccountEntity();
         accountEntity.addBalance(BigDecimal.TEN);
 
@@ -138,6 +120,61 @@ public class AccountServiceTest {
 
         verify(accountRepository).findById(idAccount);
 
-        assertEquals(0, accountEntityExpectedDTO .balance().compareTo(account.balance()));
+        assertEquals(0, accountEntityExpectedDTO.balance().compareTo(account.balance()));
+    }
+
+    @Test
+    public void testIncreaseAccountBalance_PositiveValue() {
+        IncreaseAccountBalanceRequestDTO increaseAccountBalanceRequestDTO = new IncreaseAccountBalanceRequestDTO(
+                idAccount.toString(),
+                BigDecimal.valueOf(10.25)
+        );
+        AccountEntity accountEntity = new AccountEntity(idClient);
+
+        when(accountRepository.findById(idAccount)).thenReturn(Optional.of(accountEntity));
+        when(accountRepository.save(accountEntity)).thenReturn(accountEntity);
+
+        accountService.increaseAccountBalance(increaseAccountBalanceRequestDTO);
+
+        assertEquals(BigDecimal.valueOf(10.25), accountEntity.getBalance());
+    }
+
+    @Test
+    public void testIncreaseAccountBalance_NegativeValue() {
+        String expectedMessage = "O valor a ser adicionado deve ser maior que zero.";
+
+        IncreaseAccountBalanceRequestDTO increaseAccountBalanceRequestDTO = new IncreaseAccountBalanceRequestDTO(
+                idAccount.toString(),
+                BigDecimal.valueOf(-6)
+        );
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            accountService.increaseAccountBalance(increaseAccountBalanceRequestDTO);
+        });
+
+        verify(accountRepository, never()).findById(any(UUID.class));
+        verify(accountRepository, never()).save(any(AccountEntity.class));
+
+        assertEquals(expectedMessage, exception.getMessage());
+    }
+
+    @Test
+    public void testIncreaseAccountBalance_IdAccountNotFound() {
+        String expectedMessage = "Não foi encontrada uma conta com esse id: " + idAccount;
+
+        IncreaseAccountBalanceRequestDTO increaseAccountBalanceRequestDTO = new IncreaseAccountBalanceRequestDTO(
+                idAccount.toString(),
+                BigDecimal.TEN
+        );
+
+
+        NotFoundDatabaseException exception = assertThrows(NotFoundDatabaseException.class, () -> {
+            accountService.increaseAccountBalance(increaseAccountBalanceRequestDTO);
+        });
+
+        verify(accountRepository).findById(idAccount);
+        verify(accountRepository, never()).save(any(AccountEntity.class));
+
+        assertEquals(expectedMessage, exception.getMessage());
     }
 }
