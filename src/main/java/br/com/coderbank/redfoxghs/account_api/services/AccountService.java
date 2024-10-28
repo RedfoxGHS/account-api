@@ -1,9 +1,10 @@
 package br.com.coderbank.redfoxghs.account_api.services;
 
-import br.com.coderbank.redfoxghs.account_api.controllers.dtos.request.IncreaseAccountBalanceRequestDTO;
+import br.com.coderbank.redfoxghs.account_api.controllers.dtos.request.AccountBalanceRequestDTO;
 import br.com.coderbank.redfoxghs.account_api.controllers.dtos.response.AccountBalanceResponseDTO;
 import br.com.coderbank.redfoxghs.account_api.controllers.dtos.response.AccountResponseDTO;
 import br.com.coderbank.redfoxghs.account_api.entities.AccountEntity;
+import br.com.coderbank.redfoxghs.account_api.exception.generalExceptions.InsufficientBalanceException;
 import br.com.coderbank.redfoxghs.account_api.exception.dbexceptions.ConflictDatabaseException;
 import br.com.coderbank.redfoxghs.account_api.exception.dbexceptions.CustomDatabaseException;
 import br.com.coderbank.redfoxghs.account_api.exception.dbexceptions.NotFoundDatabaseException;
@@ -43,19 +44,45 @@ public class AccountService {
         return new AccountBalanceResponseDTO(accountEntity.getBalance());
     }
 
-    public void increaseAccountBalance(IncreaseAccountBalanceRequestDTO increaseAccountBalance) {
+    public void increaseAccountBalance(AccountBalanceRequestDTO increaseAccountBalance) {
         UUID accountId = UUID.fromString(increaseAccountBalance.idAccount());
-        BigDecimal amountToAdd = increaseAccountBalance.balance();
+        BigDecimal amountToAdd = validateAndGetAmount(increaseAccountBalance);
 
-        if (amountToAdd.signum() <= 0) {
-            throw new IllegalArgumentException("O valor a ser adicionado deve ser maior que zero.");
-        }
-
-        AccountEntity accountEntity = accountRepository.findById(accountId)
-                .orElseThrow(() -> new NotFoundDatabaseException("Não foi encontrada uma conta com esse id: " + accountId));
+        AccountEntity accountEntity = this.findAccount(accountId);
 
         accountEntity.addBalance(amountToAdd);
 
         accountRepository.save(accountEntity);
+    }
+
+    public void decreaseAccountBalance(AccountBalanceRequestDTO decreaseAccountBalance) {
+        UUID accountId = UUID.fromString(decreaseAccountBalance.idAccount());
+        BigDecimal amountToSubtract = validateAndGetAmount(decreaseAccountBalance);
+
+        AccountEntity accountEntity = this.findAccount(accountId);
+
+        validateSufficientBalance(accountEntity, amountToSubtract);
+
+        accountEntity.subtractBalance(amountToSubtract);
+
+        accountRepository.save(accountEntity);
+    }
+
+    private AccountEntity findAccount(UUID accountId) {
+        return accountRepository.findById(accountId)
+                .orElseThrow(() -> new NotFoundDatabaseException("Não foi encontrada uma conta com esse id: " + accountId));
+    }
+
+    private BigDecimal validateAndGetAmount(AccountBalanceRequestDTO request) {
+        BigDecimal amount = request.balance();
+        if (amount.signum() <= 0) {
+            throw new IllegalArgumentException("O valor a ser adicionado deve ser maior que zero.");
+        }
+        return amount;
+    }
+    private void validateSufficientBalance(AccountEntity accountEntity, BigDecimal amountToSubtract) {
+        if (accountEntity.getBalance().compareTo(amountToSubtract) < 0) {
+            throw new InsufficientBalanceException("Saldo insuficiente. Saldo atual: " + accountEntity.getBalance());
+        }
     }
 }

@@ -1,7 +1,7 @@
 package br.com.coderbank.redfoxghs.account_api.controllers;
 
+import br.com.coderbank.redfoxghs.account_api.controllers.dtos.request.AccountBalanceRequestDTO;
 import br.com.coderbank.redfoxghs.account_api.controllers.dtos.request.AccountRequestDTO;
-import br.com.coderbank.redfoxghs.account_api.controllers.dtos.request.IncreaseAccountBalanceRequestDTO;
 import br.com.coderbank.redfoxghs.account_api.controllers.dtos.response.AccountBalanceResponseDTO;
 import br.com.coderbank.redfoxghs.account_api.controllers.dtos.response.AccountResponseDTO;
 import br.com.coderbank.redfoxghs.account_api.services.AccountService;
@@ -37,8 +37,14 @@ public class AccountController {
     }
 
     @PatchMapping("/deposit")
-    public ResponseEntity<Void> increaseAccountBalance(@Valid @RequestBody IncreaseAccountBalanceRequestDTO increaseAccountBalance) {
+    public ResponseEntity<Void> increaseAccountBalance(@Valid @RequestBody AccountBalanceRequestDTO increaseAccountBalance) {
         accountService.increaseAccountBalance(increaseAccountBalance);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @PatchMapping("/withdrawn")
+    public ResponseEntity<Void> decreaseAccountBalance(@Valid @RequestBody AccountBalanceRequestDTO decreaseAccountBalance) {
+        accountService.decreaseAccountBalance(decreaseAccountBalance);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

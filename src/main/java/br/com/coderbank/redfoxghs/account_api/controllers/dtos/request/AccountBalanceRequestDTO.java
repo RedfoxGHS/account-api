@@ -7,13 +7,13 @@ import org.hibernate.validator.constraints.UUID;
 
 import java.math.BigDecimal;
 
-public record IncreaseAccountBalanceRequestDTO(
+public record AccountBalanceRequestDTO(
         @NotBlank(message = "Account ID is mandatory")
         @UUID(message = "Invalid UUID format")
         String idAccount,
 
-        @NotNull(message = "Please provide a value increase; it is required.")
-        @Positive(message = "The value increase must be greater than zero.")
+        @NotNull(message = "Please provide a value; it is required.")
+        @Positive(message = "The value must be greater than zero.")
         BigDecimal balance
 ) {
 }

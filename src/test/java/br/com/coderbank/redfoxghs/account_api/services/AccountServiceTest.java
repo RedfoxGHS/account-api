@@ -1,9 +1,10 @@
 package br.com.coderbank.redfoxghs.account_api.services;
 
-import br.com.coderbank.redfoxghs.account_api.controllers.dtos.request.IncreaseAccountBalanceRequestDTO;
+import br.com.coderbank.redfoxghs.account_api.controllers.dtos.request.AccountBalanceRequestDTO;
 import br.com.coderbank.redfoxghs.account_api.controllers.dtos.response.AccountBalanceResponseDTO;
 import br.com.coderbank.redfoxghs.account_api.controllers.dtos.response.AccountResponseDTO;
 import br.com.coderbank.redfoxghs.account_api.entities.AccountEntity;
+import br.com.coderbank.redfoxghs.account_api.exception.generalExceptions.InsufficientBalanceException;
 import br.com.coderbank.redfoxghs.account_api.exception.dbexceptions.CustomDatabaseException;
 import br.com.coderbank.redfoxghs.account_api.exception.dbexceptions.NotFoundDatabaseException;
 import br.com.coderbank.redfoxghs.account_api.repositories.AccountRepository;
@@ -125,7 +126,7 @@ public class AccountServiceTest {
 
     @Test
     public void testIncreaseAccountBalance_PositiveValue() {
-        IncreaseAccountBalanceRequestDTO increaseAccountBalanceRequestDTO = new IncreaseAccountBalanceRequestDTO(
+        AccountBalanceRequestDTO accountBalanceRequestDTO = new AccountBalanceRequestDTO(
                 idAccount.toString(),
                 BigDecimal.valueOf(10.25)
         );
@@ -134,7 +135,7 @@ public class AccountServiceTest {
         when(accountRepository.findById(idAccount)).thenReturn(Optional.of(accountEntity));
         when(accountRepository.save(accountEntity)).thenReturn(accountEntity);
 
-        accountService.increaseAccountBalance(increaseAccountBalanceRequestDTO);
+        accountService.increaseAccountBalance(accountBalanceRequestDTO);
 
         assertEquals(BigDecimal.valueOf(10.25), accountEntity.getBalance());
     }
@@ -143,13 +144,13 @@ public class AccountServiceTest {
     public void testIncreaseAccountBalance_NegativeValue() {
         String expectedMessage = "O valor a ser adicionado deve ser maior que zero.";
 
-        IncreaseAccountBalanceRequestDTO increaseAccountBalanceRequestDTO = new IncreaseAccountBalanceRequestDTO(
+        AccountBalanceRequestDTO accountBalanceRequestDTO = new AccountBalanceRequestDTO(
                 idAccount.toString(),
                 BigDecimal.valueOf(-6)
         );
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            accountService.increaseAccountBalance(increaseAccountBalanceRequestDTO);
+            accountService.increaseAccountBalance(accountBalanceRequestDTO);
         });
 
         verify(accountRepository, never()).findById(any(UUID.class));
@@ -162,17 +163,93 @@ public class AccountServiceTest {
     public void testIncreaseAccountBalance_IdAccountNotFound() {
         String expectedMessage = "Não foi encontrada uma conta com esse id: " + idAccount;
 
-        IncreaseAccountBalanceRequestDTO increaseAccountBalanceRequestDTO = new IncreaseAccountBalanceRequestDTO(
+        AccountBalanceRequestDTO accountBalanceRequestDTO = new AccountBalanceRequestDTO(
                 idAccount.toString(),
                 BigDecimal.TEN
         );
 
-
         NotFoundDatabaseException exception = assertThrows(NotFoundDatabaseException.class, () -> {
-            accountService.increaseAccountBalance(increaseAccountBalanceRequestDTO);
+            accountService.increaseAccountBalance(accountBalanceRequestDTO);
         });
 
         verify(accountRepository).findById(idAccount);
+        verify(accountRepository, never()).save(any(AccountEntity.class));
+
+        assertEquals(expectedMessage, exception.getMessage());
+    }
+
+    @Test
+    public void testDecreaseAccountBalance_SuccessWithdraw() {
+        AccountBalanceRequestDTO accountBalanceRequestDTO = new AccountBalanceRequestDTO(
+                idAccount.toString(),
+                BigDecimal.TEN
+        );
+
+        AccountEntity accountEntity = new AccountEntity(idClient);
+        accountEntity.addBalance(BigDecimal.valueOf(15));
+
+        when(accountRepository.findById(idAccount)).thenReturn(Optional.of(accountEntity));
+        when(accountRepository.save(accountEntity)).thenReturn(accountEntity);
+
+        accountService.decreaseAccountBalance(accountBalanceRequestDTO);
+
+        assertEquals(BigDecimal.valueOf(5), accountEntity.getBalance());
+    }
+
+    @Test
+    public void testDecreaseAccountBalance_InsufficientBalanceException() {
+        String expectedMessage = "Saldo insuficiente. Saldo atual: " + 55;
+
+        AccountBalanceRequestDTO accountBalanceRequestDTO = new AccountBalanceRequestDTO(
+                idAccount.toString(),
+                BigDecimal.valueOf(100)
+        );
+
+        AccountEntity accountEntity = new AccountEntity(idClient);
+        accountEntity.addBalance(BigDecimal.valueOf(55));
+
+        when(accountRepository.findById(idAccount)).thenReturn(Optional.of(accountEntity));
+
+        InsufficientBalanceException exception = assertThrows(InsufficientBalanceException.class, () -> {
+            accountService.decreaseAccountBalance(accountBalanceRequestDTO);
+        });
+
+        assertEquals(expectedMessage, exception.getMessage());
+    }
+
+    @Test
+    public void testDecreaseAccountBalance_IdAccountNotFound() {
+        String expectedMessage = "Não foi encontrada uma conta com esse id: " + idAccount;
+
+        AccountBalanceRequestDTO accountBalanceRequestDTO = new AccountBalanceRequestDTO(
+                idAccount.toString(),
+                BigDecimal.valueOf(100)
+        );
+
+        NotFoundDatabaseException exception = assertThrows(NotFoundDatabaseException.class, () -> {
+            accountService.decreaseAccountBalance(accountBalanceRequestDTO);
+        });
+
+        verify(accountRepository).findById(idAccount);
+        verify(accountRepository, never()).save(any(AccountEntity.class));
+
+        assertEquals(expectedMessage, exception.getMessage());
+    }
+
+    @Test
+    public void testDecreaseAccountBalance_NegativeValue() {
+        String expectedMessage = "O valor a ser adicionado deve ser maior que zero.";
+
+        AccountBalanceRequestDTO accountBalanceRequestDTO = new AccountBalanceRequestDTO(
+                idAccount.toString(),
+                BigDecimal.valueOf(-6)
+        );
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            accountService.decreaseAccountBalance(accountBalanceRequestDTO);
+        });
+
+        verify(accountRepository, never()).findById(any(UUID.class));
         verify(accountRepository, never()).save(any(AccountEntity.class));
 
         assertEquals(expectedMessage, exception.getMessage());
