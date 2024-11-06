@@ -33,8 +33,15 @@ public class AccountEntity {
 
     public AccountEntity() {
         this.balance = BigDecimal.ZERO;
-        agencyNumber = 1;
-        accountNumber = 100000 + new Random().nextInt(900000);
+        this.agencyNumber = 1;
+        this.accountNumber = 100000 + new Random().nextInt(900000);
+    }
+
+    public AccountEntity(UUID idClient) {
+        this.idClient = idClient;
+        this.balance = BigDecimal.ZERO;
+        this.agencyNumber = 1;
+        this.accountNumber = 100000 + new Random().nextInt(900000);
     }
 
     public UUID getIdAccount() {

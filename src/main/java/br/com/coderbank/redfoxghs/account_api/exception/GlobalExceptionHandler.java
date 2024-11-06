@@ -4,6 +4,7 @@ import br.com.coderbank.redfoxghs.account_api.exception.dbexceptions.ConflictDat
 import br.com.coderbank.redfoxghs.account_api.exception.dbexceptions.CustomDatabaseException;
 import br.com.coderbank.redfoxghs.account_api.exception.dbexceptions.GeneralDatabaseException;
 import br.com.coderbank.redfoxghs.account_api.exception.dbexceptions.NotFoundDatabaseException;
+import br.com.coderbank.redfoxghs.account_api.exception.generalExceptions.InsufficientBalanceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.validation.FieldError;
@@ -37,6 +38,15 @@ public class GlobalExceptionHandler {
         problemDetail.setDetail(errors.toString());
         problemDetail.setType(URI.create("https://http.cat/status/400"));
 
+        return problemDetail;
+    }
+
+    @ExceptionHandler(InsufficientBalanceException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ProblemDetail handleInsufficientBalanceException(InsufficientBalanceException ex) {
+        var problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
+        problemDetail.setTitle("Saldo Insuficiente");
+        problemDetail.setType(URI.create("https://http.cat/status/409"));
         return problemDetail;
     }
 
