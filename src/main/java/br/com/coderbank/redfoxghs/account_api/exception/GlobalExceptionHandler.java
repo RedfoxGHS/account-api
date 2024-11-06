@@ -42,11 +42,11 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(InsufficientBalanceException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseStatus(HttpStatus.CONFLICT)
     public ProblemDetail handleInsufficientBalanceException(InsufficientBalanceException ex) {
-        var problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
+        var problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
         problemDetail.setTitle("Saldo Insuficiente");
-        problemDetail.setType(URI.create("https://http.cat/status/400"));
+        problemDetail.setType(URI.create("https://http.cat/status/409"));
         return problemDetail;
     }
 
